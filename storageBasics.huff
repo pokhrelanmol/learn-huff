@@ -1,0 +1,44 @@
+
+//Storage slots are simply keys in a very large array where contracts keep their state. The compiler will assign STORAGE_SLOT0 the value 0, STORAGE_SLOT1 the value 1 etc. at compile time. Throughout your code you just reference the storage slots the same way constants are used in any language.
+
+//Example
+
+// #define constant STORAGE_SLOT0 = FREE_STORAGE_POINTER() //0
+// #define constant STORAGE_SLOT1 = FREE_STORAGE_POINTER() //1
+// #define constant STORAGE_SLOT2 = FREE_STORAGE_POINTER() //2
+
+/* --------------------------------- Contract --------------------------------- */
+
+//STORING VALUE
+
+#define constant VALUE = FREE_STORAGE_POINTER() //0 -> where we will store the value
+
+#define macro SET_5() = takes(0) returns(0) {
+    0x5 // value to set
+    [VALUE] // storage slot to set value to
+    sstore // set 5 to storage slot 0
+}
+/* --------------------------------- OPCODES -------------------------------- */
+
+//[00]	PUSH1	05  -> stack = [05]
+//[02]	PUSH1	00 -> stack = [00,05]
+//[04]	SSTORE	   -> slot 0 : 05 -> stack = []
+
+
+//READING VALUE
+
+#define macro SET_5_GET_5() = takes(0) returns(0) {
+    0x5 // value to set
+    [VALUE] // storage slot to set value to
+    sstore // set 5 to storage slot 0
+
+    [VALUE] // storage slot to get value from
+    sload // get value from storage slot 0
+}
+
+/* --------------------------------- OPCODES -------------------------------- */
+// [00]	PUSH1	05
+// [02]	PUSH1	00
+// [04]	SSTORE	
+// [05]	PUSH1	00 -> stack = [00]
+// [07]	SLOAD   -> Load value from storage slot 0 

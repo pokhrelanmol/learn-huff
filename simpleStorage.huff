@@ -1,0 +1,49 @@
+#define function setValue(uint256) nonpayable returns ()
+#define function getValue() nonpayable returns (uint256)
+
+#define constant VALUE = FREE_STORAGE_POINTER()
+
+#define macro SET_VALUE = takes(0) returns(0) {
+        // Read uint256 from calldata, remember to read from byte 4 to allow for the function selector! 
+    0x04 // [0x04] 
+    calldataload // [value]
+
+   //Get pointer and store
+   [VALUE] //[slot0,value]
+   sstore  // slot0 = value
+}
+
+#define macro GET_VALUE() = takes(0) returns(0) {
+    [VALUE] // [slot0]
+    sload // [value]
+
+    //Store return value in memory
+    0x00 // [0x00,value]
+    mstore // -> now memory location 0x00 = value
+
+    //Return first 32 bytes of memory containing our uint256
+   0x20 // [0x20,0x00,value] -> 0x20 is indicating the size of the return data (32 bytes)
+   0x00 // location of data to return
+   return // return 32 bytes from location 0x00
+
+}
+
+
+// To call our macro from the external contract we need to create a dispatcher function
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload  // load 32 bytes call data
+    0xe0 shr // shift right by 28 bytes to get the first 4 bytes (function selector)
+    //STACK = [selector]
+    // dup1 make duplicate of the first stack item here after dup1 we have [selector,selector] 
+    dup1 __FUNC_SIG(setValue) eq setValue jumpi // if selector == setValue then jump to setValue
+    dup1 __FUNC_SIG(getValue) eq getValue jumpi // if selector == getValue then jump to getValue
+
+    setValue:
+        SET_VALUE()
+    getValue:
+        GET_VALUE()
+
+    0x00 0x00 revert
+
+}
