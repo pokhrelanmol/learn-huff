@@ -1,0 +1,28 @@
+#define macro MAIN() = takes(0) returns(0) {
+    // this is saying load 0x20(32) bytes from memory at position 0x00, which will hbe Hello world string
+    0x20 // bytes offset
+    0x00 // location to load
+    mstore // 0x00 = 0x20
+
+    0x0d // length of string hello, world!(13 in decimal)
+    0x20 // store length in 0x20
+    mstore // 0x20 = 0x0d
+
+    //memory looks like
+    // 0x00 = 0x20 => 32 bytes
+    // 0x20 = 0x0d => 13 character with spaces
+//0x48656c6c6f2c20776f726c6421 -> Hello, world!  in hex
+    __RIGHTPAD(0x48656c6c6f2c20776f726c6421) // not storing all 32 bytes but padding to right and only storing 26 bytes
+    // stack : ["Hello, world!"] => 0x48656c6c6f2c20776f726c6421000000000000
+
+    0x40 // memory location to store
+    // stack : [0x40,"Hello, world!"]
+    mstore // 0x40 = 0x48656c6c6f2c20776f726c6421000000000000
+    // Stack in empty
+    //Memory now looks like
+    // 0x00 = 0x20 => 32 bytes
+    // 0x20 = 0x0d => 13 character with spaces
+    // 0x40 = 0x48656c6c6f2c20776f726c6421000000000000(Hello,world!) 
+
+
+}

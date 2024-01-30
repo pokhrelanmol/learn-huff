@@ -1,0 +1,23 @@
+#define function addTwo(uint256, uint256) view returns(uint256)
+//Run `huffc filename.huff --bytecode` to get bytecode
+#define macro MAIN() = takes(0) returns(0) {
+   //Get the fn selector
+   0x00 // Push 0 onto the stack
+   calldataload // takes 0 as a input and loan first 32 bytes from calldata onto stack
+   0xE0 // pushes 224 onto the stack. 256 bit - 32 bits = 224 bits or 28 bytes, 32 bits is a fn selector(4 bytes*8 bits=32 bits), rest is the input data
+   shr // shift 28 bytes to the right and push first 4 byte fn selector onto the stack
+   // 0x0f52d66e(fn selector) | 0000000000000000000000000000000000000000000000000000(28 bytes)
+     // Jump to the implementation of the ADD_TWO function if the calldata matches the function selector
+    __FUNC_SIG(addTwo) eq addTwo jumpi // check selectot of addTwo with selector in stack and jump to addTwo if equal
+   addTwo:
+        ADD_TWO()
+}
+
+#define macro ADD_TWO() = takes(0) returns(0) {
+   0x04 calldataload // Load first 32 bytes from calldata onto stack - num1 // Do not load Fn selector->0x00-0x04
+   0x24 calldataload // Load second 32 bytes from calldata onto stack[num1,num2] // Do not load Fn selector -> 0x20 - 0x24
+   add // Add the two values [num1+num2]
+
+   0x00 mstore // Store the result in memory at position 0
+   0x20 0x00 return // Return 32 bytes from memory at position 0
+}
